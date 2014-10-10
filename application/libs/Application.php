@@ -22,7 +22,22 @@ class Application
 	 * Parse the URL, load required controller and actually do every bit of work
 	 * to run the app.
 	 */
-	public function __construct() {
+	public function __construct() 
+	{
+		try {
+			$this->init();
+		} catch (Exception $e) {
+			$value = array(
+					'status' => 'failed',
+					'errormsg' => $e->getMessage()
+			);
+			echo json_encode($value);
+		} 
+		
+	}
+	
+	private function init()
+	{
 		$this->spiltUrl();
 		
 		// For debug: uncomment the line line bellow.
@@ -36,7 +51,7 @@ class Application
 				// example: if the controller is car, then this line would translate into $this->car = new car();
 				require CONTROLLERS_PATH . $this->url_controller . '.php';
 				$this->url_controller = new $this->url_controller();
-				
+		
 				// check for method: does such a method exist in the controller ?
 				if($this->url_action) {
 					if(method_exists($this->url_controller, $this->url_action)) {
@@ -58,16 +73,17 @@ class Application
 						die('Invalid action');
 					}
 				} else {
-					// there is no action provided. like http://example.com/controll/ 
+					// there is no action provided. like http://example.com/controll/
 					// default/fallback: call the index() method of the selected controller.
 					$this->url_controller->index();
 				}
 			} else {
 				// there is no appropiate controller that is requested
 				// TODO: implement error page
-				die("controller doesn't exist.");
+				//die("controller doesn't exist.");
+				throw new Exception('Invalid controller');
 			}
-			
+				
 		} else {
 			// invalid URL, so simply show home/index
 			require CONTROLLERS_PATH . 'index.php';
@@ -77,6 +93,7 @@ class Application
 		
 	}
 	
+
 	private function spiltUrl()
 	{
 		// the url will pass as a $_GET['url']. the process is done by 
